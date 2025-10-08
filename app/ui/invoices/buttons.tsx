@@ -1,6 +1,10 @@
+'use client'
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteInvoice } from '@/app/lib/actions';
+import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 
 export function CreateInvoice() {
   return (
@@ -25,16 +29,30 @@ export function UpdateInvoice({ id }: { id: string }) {
   );
 }
 
+function DeleteButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button 
+      type="submit" 
+      className="rounded-md border p-2 hover:bg-gray-100"
+      disabled={pending}
+    >
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </button>
+  );
+}
+
 export function DeleteInvoice({ id }: { id: string }) {
   const deleteInvoiceWithId = deleteInvoice.bind(null, id);
+  const [state, formAction] = useActionState(deleteInvoiceWithId, { success: true });
+  
   return (
-    <form action={deleteInvoiceWithId}>
-    <>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </>
+    <form action={formAction}>
+      <DeleteButton />
+      {!state?.success && (
+        <p className="text-red-500 text-sm mt-1">{state?.message}</p>
+      )}
     </form>
   );
 }
